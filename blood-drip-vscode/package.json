@@ -1,0 +1,53 @@
+{
+  "name": "blood-drip",
+  "displayName": "Blood Drip",
+  "description": "Horror-themed visual effects for VS Code - animated blood drips from errors, ethereal cursor trails, and spooky TODO icons",
+  "version": "0.0.1",
+  "publisher": "blood-drip",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Themes",
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./src/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Blood Drip",
+      "properties": {
+        "bloodDrip.bloodDripEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable blood drip animation on error lines"
+        },
+        "bloodDrip.cursorTrailEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable ethereal cursor movement trails"
+        },
+        "bloodDrip.todoIconEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable spooky TODO icons in the gutter"
+        },
+        "bloodDrip.todoIconVariant": {
+          "type": "string",
+          "default": "skull",
+          "enum": ["skull", "ghost", "tombstone"],
+          "description": "Select the spooky icon variant for TODO markers"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint src --ext js"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.74.0",
+    "eslint": "^8.0.0"
+  }
+}
