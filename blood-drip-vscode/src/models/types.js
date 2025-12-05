@@ -3,9 +3,10 @@
  * @enum {string}
  */
 const EffectType = {
-    BloodDrip: 'bloodDrip',
-    CursorTrail: 'cursorTrail',
-    TodoIcon: 'todoIcon'
+  BloodDrip: "bloodDrip",
+  TodoIcon: "todoIcon",
+  Candlelight: "candlelight",
+  GhostCursor: "ghostCursor",
 };
 
 /**
@@ -13,12 +14,12 @@ const EffectType = {
  * @enum {string}
  */
 const TodoIconVariant = {
-    Skull: 'skull',
-    Ghost: 'ghost',
-    Tombstone: 'tombstone'
+  Skull: "skull",
+  Ghost: "ghost",
+  Tombstone: "tombstone",
 };
 
 module.exports = {
-    EffectType,
-    TodoIconVariant
+  EffectType,
+  TodoIconVariant,
 };

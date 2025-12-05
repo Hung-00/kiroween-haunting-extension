@@ -1,7 +1,7 @@
 {
   "name": "blood-drip",
   "displayName": "Blood Drip",
-  "description": "Horror-themed visual effects for VS Code - animated blood drips from errors, ethereal cursor trails, and spooky TODO icons",
+  "description": "Horror-themed visual effects for VS Code - animated blood drips from errors and spooky TODO icons",
   "version": "0.0.1",
   "publisher": "blood-drip",
   "engines": {
@@ -22,10 +22,6 @@
         "title": "Blood Drip: Toggle Blood Drip Effect"
       },
       {
-        "command": "bloodDrip.toggleGhostCursor",
-        "title": "Blood Drip: Toggle Ghost Cursor Trail"
-      },
-      {
         "command": "bloodDrip.toggleTodoIcons",
         "title": "Blood Drip: Toggle Spooky TODO Icons"
       },
@@ -34,8 +30,8 @@
         "title": "Blood Drip: Toggle Candlelight Mode"
       },
       {
-        "command": "bloodDrip.toggleFloatingGhost",
-        "title": "Blood Drip: Toggle Floating Ghost"
+        "command": "bloodDrip.toggleGhostCursor",
+        "title": "Blood Drip: Toggle Ghost Cursor"
       },
       {
         "command": "bloodDrip.toggleAllEffects",
@@ -50,11 +46,6 @@
           "default": true,
           "description": "Enable blood drip animation on error lines"
         },
-        "bloodDrip.cursorTrailEnabled": {
-          "type": "boolean",
-          "default": true,
-          "description": "Enable ethereal cursor movement trails"
-        },
         "bloodDrip.todoIconEnabled": {
           "type": "boolean",
           "default": true,
@@ -63,7 +54,11 @@
         "bloodDrip.todoIconVariant": {
           "type": "string",
           "default": "skull",
-          "enum": ["skull", "ghost", "tombstone"],
+          "enum": [
+            "skull",
+            "ghost",
+            "tombstone"
+          ],
           "description": "Select the spooky icon variant for TODO markers"
         },
         "bloodDrip.candlelightEnabled": {
@@ -71,10 +66,10 @@
           "default": false,
           "description": "Enable candlelight mode (dims lines away from cursor)"
         },
-        "bloodDrip.floatingGhostEnabled": {
+        "bloodDrip.ghostCursorEnabled": {
           "type": "boolean",
           "default": true,
-          "description": "Enable floating ghost that randomly appears in the editor"
+          "description": "Enable ghost emoji that follows your cursor"
         }
       }
     }
