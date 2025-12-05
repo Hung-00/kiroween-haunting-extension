@@ -51,6 +51,7 @@ class ConfigurationManager {
         this.getConfig("todoIconVariant") ?? TodoIconVariant.Skull,
       candlelightEnabled: this.getConfig("candlelightEnabled") ?? false,
       ghostCursorEnabled: this.getConfig("ghostCursorEnabled") ?? true,
+      codeKillerEnabled: this.getConfig("codeKillerEnabled") ?? true,
     };
   }
 

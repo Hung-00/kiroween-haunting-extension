@@ -7,6 +7,7 @@ const EffectType = {
   TodoIcon: "todoIcon",
   Candlelight: "candlelight",
   GhostCursor: "ghostCursor",
+  CodeKiller: "codeKiller",
 };
 
 /**

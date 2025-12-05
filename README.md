@@ -26,7 +26,17 @@ Focus on your code with a candlelight effect that dims lines away from your curs
 
 ### 👻 Ghost Cursor
 
-A spooky ghost emoji follows your cursor wherever you go! The ghost appears at your cursor position and moves with you as you navigate through your code.
+A spooky ghost emoji follows your cursor wherever you go! The ghost appears at your cursor position and moves with you as you navigate through your code. Each cursor movement shows a random Halloween emoji (👻🎃💀🦇🕷️🕸️🧛🧟🪦⚰️🔮🌙).
+
+### 🪓 Code Killer
+
+When you delete 3+ lines of code at once, a murder animation appears! The more lines you delete, the more dramatic the message:
+
+- 3-4 lines: "🪓 3 lines eliminated 🪓"
+- 5-9 lines: "🪓 MURDER! 5 lines killed! 🪓"
+- 10-19 lines: "💀 CARNAGE! 10 lines destroyed! 💀"
+- 20-49 lines: "☠️ MASSACRE! 20 lines slaughtered! ☠️"
+- 50+ lines: "⚰️ GENOCIDE! 50 lines obliterated! ⚰️"
 
 ## Commands
 
@@ -38,6 +48,7 @@ Open Command Palette (`Ctrl+Shift+P`) and search for:
 | `Blood Drip: Toggle Spooky TODO Icons`    | Turn TODO icons on/off        |
 | `Blood Drip: Toggle Candlelight Mode`     | Turn candlelight focus on/off |
 | `Blood Drip: Toggle Ghost Cursor`         | Turn ghost cursor on/off      |
+| `Blood Drip: Toggle Code Killer`          | Turn code killer on/off       |
 | `Blood Drip: Toggle All Haunting Effects` | Toggle all effects at once    |
 
 ## Installation
@@ -141,13 +152,14 @@ This creates `blood-drip-0.0.1.vsix`. To install it:
 
 Open Settings (Ctrl+,) and search for "Blood Drip" to customize:
 
-| Setting                        | Description                                           | Default |
-| ------------------------------ | ----------------------------------------------------- | ------- |
-| `bloodDrip.bloodDripEnabled`   | Enable blood drip animation on error lines            | `true`  |
-| `bloodDrip.todoIconEnabled`    | Enable spooky TODO icons in the gutter                | `true`  |
-| `bloodDrip.todoIconVariant`    | Select icon variant: skull, ghost, or tombstone       | `skull` |
-| `bloodDrip.candlelightEnabled` | Enable candlelight mode (dims lines away from cursor) | `false` |
-| `bloodDrip.ghostCursorEnabled` | Enable ghost emoji that follows your cursor           | `true`  |
+| Setting                        | Description                                             | Default |
+| ------------------------------ | ------------------------------------------------------- | ------- |
+| `bloodDrip.bloodDripEnabled`   | Enable blood drip animation on error lines              | `true`  |
+| `bloodDrip.todoIconEnabled`    | Enable spooky TODO icons in the gutter                  | `true`  |
+| `bloodDrip.todoIconVariant`    | Select icon variant: skull, ghost, or tombstone         | `skull` |
+| `bloodDrip.candlelightEnabled` | Enable candlelight mode (dims lines away from cursor)   | `false` |
+| `bloodDrip.ghostCursorEnabled` | Enable ghost emoji that follows your cursor             | `true`  |
+| `bloodDrip.codeKillerEnabled`  | Enable murder animation when deleting large code blocks | `true`  |
 
 ## Performance
 

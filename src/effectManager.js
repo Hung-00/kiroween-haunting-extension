@@ -4,6 +4,7 @@ const BloodDripController = require("./controllers/bloodDripController");
 const TodoIconController = require("./controllers/todoIconController");
 const CandlelightController = require("./controllers/candlelightController");
 const GhostCursorController = require("./controllers/ghostCursorController");
+const CodeKillerController = require("./controllers/codeKillerController");
 const ErrorHandler = require("./utils/errorHandler");
 const { EffectType } = require("./models/types");
 
@@ -22,6 +23,8 @@ class EffectManager {
     this.candlelightController = null;
     /** @type {GhostCursorController|null} */
     this.ghostCursorController = null;
+    /** @type {CodeKillerController|null} */
+    this.codeKillerController = null;
     /** @type {vscode.Disposable[]} */
     this.disposables = [];
     /** @type {boolean} */
@@ -42,11 +45,13 @@ class EffectManager {
     this.todoIconController = new TodoIconController();
     this.candlelightController = new CandlelightController();
     this.ghostCursorController = new GhostCursorController();
+    this.codeKillerController = new CodeKillerController();
 
     this.bloodDripController.initialize(context);
     this.todoIconController.initialize(context);
     this.candlelightController.initialize(context);
     this.ghostCursorController.initialize(context);
+    this.codeKillerController.initialize(context);
 
     this.applyConfiguration(config);
     this.registerCommands(context);
@@ -134,6 +139,17 @@ class EffectManager {
     );
 
     context.subscriptions.push(
+      vscode.commands.registerCommand("bloodDrip.toggleCodeKiller", () => {
+        if (this.codeKillerController) {
+          const enabled = this.codeKillerController.toggle();
+          vscode.window.showInformationMessage(
+            `🪓 Code killer ${enabled ? "enabled" : "disabled"}!`
+          );
+        }
+      })
+    );
+
+    context.subscriptions.push(
       vscode.commands.registerCommand("bloodDrip.toggleAllEffects", () => {
         if (this.bloodDripController) {
           if (this.bloodDripController.isEnabled) {
@@ -154,6 +170,9 @@ class EffectManager {
         }
         if (this.ghostCursorController) {
           this.ghostCursorController.toggle();
+        }
+        if (this.codeKillerController) {
+          this.codeKillerController.toggle();
         }
         vscode.window.showInformationMessage(
           "🎃 All haunting effects toggled!"
@@ -185,6 +204,12 @@ class EffectManager {
       if (this.ghostCursorController) this.ghostCursorController.enable();
     } else {
       if (this.ghostCursorController) this.ghostCursorController.disable();
+    }
+
+    if (config.codeKillerEnabled) {
+      if (this.codeKillerController) this.codeKillerController.enable();
+    } else {
+      if (this.codeKillerController) this.codeKillerController.disable();
     }
 
     if (this.todoIconController) {
@@ -247,6 +272,10 @@ class EffectManager {
     if (this.ghostCursorController) {
       this.ghostCursorController.dispose();
       this.ghostCursorController = null;
+    }
+    if (this.codeKillerController) {
+      this.codeKillerController.dispose();
+      this.codeKillerController = null;
     }
     if (this.configManager) {
       this.configManager.dispose();

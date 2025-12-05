@@ -1,9 +1,25 @@
 const vscode = require("vscode");
 const ErrorHandler = require("../utils/errorHandler");
 
+// Halloween themed emojis that randomly appear at cursor
+const HALLOWEEN_EMOJIS = [
+  "👻", // Ghost
+  "🎃", // Jack-o-lantern
+  "💀", // Skull
+  "🦇", // Bat
+  "🕷️", // Spider
+  "🕸️", // Spider web
+  "🧛", // Vampire
+  "🧟", // Zombie
+  "🪦", // Tombstone
+  "⚰️", // Coffin
+  "🔮", // Crystal ball
+  "🌙", // Crescent moon
+];
+
 /**
- * Controller for ghost emoji that follows the cursor
- * Shows 👻 at cursor position, removes when cursor moves
+ * Controller for spooky emoji that follows the cursor
+ * Shows random Halloween emoji at cursor position, changes on each move
  */
 class GhostCursorController {
   constructor() {
@@ -17,6 +33,8 @@ class GhostCursorController {
     this.isEnabled = true;
     /** @type {vscode.Position|null} */
     this.lastCursorPosition = null;
+    /** @type {string} */
+    this.currentEmoji = HALLOWEEN_EMOJIS[0];
   }
 
   /**
@@ -57,7 +75,16 @@ class GhostCursorController {
   }
 
   /**
-   * Create the ghost decoration type (pooled, created once)
+   * Get a random Halloween emoji
+   * @returns {string} Random emoji from HALLOWEEN_EMOJIS
+   */
+  getRandomEmoji() {
+    const index = Math.floor(Math.random() * HALLOWEEN_EMOJIS.length);
+    return HALLOWEEN_EMOJIS[index];
+  }
+
+  /**
+   * Create the ghost decoration type with current emoji
    */
   createDecorationType() {
     if (this.ghostDecorationType) {
@@ -66,7 +93,7 @@ class GhostCursorController {
 
     this.ghostDecorationType = vscode.window.createTextEditorDecorationType({
       after: {
-        contentText: "👻",
+        contentText: this.currentEmoji,
         margin: "0 0 0 0.2em",
         color: "rgba(255, 255, 255, 0.8)",
         fontWeight: "normal",
@@ -75,14 +102,20 @@ class GhostCursorController {
   }
 
   /**
-   * Update ghost position to current cursor location
+   * Update ghost position to current cursor location with random emoji
    * @param {vscode.TextEditor} editor
    * @param {vscode.Position} position
    */
   updateGhostPosition(editor, position) {
-    if (!this.isEnabled || !this.ghostDecorationType || !position) return;
+    if (!this.isEnabled || !position) return;
 
     try {
+      // Pick a new random emoji each time cursor moves
+      this.currentEmoji = this.getRandomEmoji();
+
+      // Recreate decoration type with new emoji
+      this.createDecorationType();
+
       // Create range at cursor position
       const range = new vscode.Range(position, position);
 

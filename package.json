@@ -34,6 +34,10 @@
         "title": "Blood Drip: Toggle Ghost Cursor"
       },
       {
+        "command": "bloodDrip.toggleCodeKiller",
+        "title": "Blood Drip: Toggle Code Killer"
+      },
+      {
         "command": "bloodDrip.toggleAllEffects",
         "title": "Blood Drip: Toggle All Haunting Effects"
       }
@@ -70,6 +74,11 @@
           "type": "boolean",
           "default": true,
           "description": "Enable ghost emoji that follows your cursor"
+        },
+        "bloodDrip.codeKillerEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable code killer animation when deleting large blocks of code"
         }
       }
     }
