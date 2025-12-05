@@ -48,7 +48,9 @@ class ConfigurationManager {
             bloodDripEnabled: this.getConfig('bloodDripEnabled') ?? true,
             cursorTrailEnabled: this.getConfig('cursorTrailEnabled') ?? true,
             todoIconEnabled: this.getConfig('todoIconEnabled') ?? true,
-            todoIconVariant: this.getConfig('todoIconVariant') ?? TodoIconVariant.Skull
+            todoIconVariant: this.getConfig('todoIconVariant') ?? TodoIconVariant.Skull,
+            candlelightEnabled: this.getConfig('candlelightEnabled') ?? false,
+            floatingGhostEnabled: this.getConfig('floatingGhostEnabled') ?? true
         };
     }
 

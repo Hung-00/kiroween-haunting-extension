@@ -16,6 +16,32 @@
   ],
   "main": "./src/extension.js",
   "contributes": {
+    "commands": [
+      {
+        "command": "bloodDrip.toggleBloodDrip",
+        "title": "Blood Drip: Toggle Blood Drip Effect"
+      },
+      {
+        "command": "bloodDrip.toggleGhostCursor",
+        "title": "Blood Drip: Toggle Ghost Cursor Trail"
+      },
+      {
+        "command": "bloodDrip.toggleTodoIcons",
+        "title": "Blood Drip: Toggle Spooky TODO Icons"
+      },
+      {
+        "command": "bloodDrip.toggleCandlelight",
+        "title": "Blood Drip: Toggle Candlelight Mode"
+      },
+      {
+        "command": "bloodDrip.toggleFloatingGhost",
+        "title": "Blood Drip: Toggle Floating Ghost"
+      },
+      {
+        "command": "bloodDrip.toggleAllEffects",
+        "title": "Blood Drip: Toggle All Haunting Effects"
+      }
+    ],
     "configuration": {
       "title": "Blood Drip",
       "properties": {
@@ -39,6 +65,16 @@
           "default": "skull",
           "enum": ["skull", "ghost", "tombstone"],
           "description": "Select the spooky icon variant for TODO markers"
+        },
+        "bloodDrip.candlelightEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable candlelight mode (dims lines away from cursor)"
+        },
+        "bloodDrip.floatingGhostEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable floating ghost that randomly appears in the editor"
         }
       }
     }

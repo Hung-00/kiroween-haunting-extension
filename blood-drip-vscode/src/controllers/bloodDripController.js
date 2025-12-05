@@ -1,10 +1,10 @@
 const vscode = require('vscode');
-const { createBloodDripStyle } = require('../models/decorationStyles');
-const { debounce, createAnimationLoop } = require('../utils/animationUtils');
+const { debounce } = require('../utils/animationUtils');
 const ErrorHandler = require('../utils/errorHandler');
 
 const DEBOUNCE_DELAY = 100;
-const ANIMATION_FPS = 30;
+const ANIMATION_FRAMES = ['🩸', '💉', '🔴', '⚫'];
+const ANIMATION_SPEED = 200;
 
 /**
  * Controller for blood drip animations on error lines
@@ -13,18 +13,14 @@ class BloodDripController {
     constructor() {
         /** @type {vscode.ExtensionContext|null} */
         this.context = null;
-        /** @type {vscode.TextEditorDecorationType|null} */
-        this.decorationType = null;
-        /** @type {Map<string, {line: number, frame: number}>} */
-        this.errorLines = new Map();
+        /** @type {Map<string, vscode.TextEditorDecorationType>} */
+        this.decorationTypes = new Map();
         /** @type {vscode.Disposable[]} */
         this.disposables = [];
         /** @type {boolean} */
         this.isEnabled = true;
         /** @type {boolean} */
         this.isPaused = false;
-        /** @type {Object|null} */
-        this.animationLoop = null;
         /** @type {Function} */
         this.debouncedUpdate = debounce(this.handleDiagnosticsChange.bind(this), DEBOUNCE_DELAY);
     }
@@ -35,7 +31,7 @@ class BloodDripController {
      */
     initialize(context) {
         this.context = context;
-        this.createDecorationType();
+        this.createDecorationTypes();
 
         // Listen for diagnostic changes
         const diagnosticDisposable = vscode.languages.onDidChangeDiagnostics((e) => {
@@ -48,18 +44,11 @@ class BloodDripController {
         // Listen for active editor changes
         const editorDisposable = vscode.window.onDidChangeActiveTextEditor((editor) => {
             if (this.isEnabled && editor) {
-                this.updateDecorations(editor);
+                const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
+                this.applyDecorationsToEditor(editor, diagnostics);
             }
         });
         this.disposables.push(editorDisposable);
-
-        // Start animation loop
-        this.animationLoop = createAnimationLoop(() => {
-            if (!this.isPaused) {
-                this.animateFrame();
-            }
-        }, ANIMATION_FPS);
-        this.animationLoop.start();
 
         // Initial check for active editor
         if (vscode.window.activeTextEditor) {
@@ -69,19 +58,56 @@ class BloodDripController {
         ErrorHandler.logInfo('Blood Drip Controller initialized');
     }
 
-
     /**
-     * Create decoration type for blood drip effect
+     * Create decoration types for different severity levels
      */
-    createDecorationType() {
-        if (this.decorationType) {
-            this.decorationType.dispose();
-        }
+    createDecorationTypes() {
+        // Dispose existing types
+        this.decorationTypes.forEach(type => type.dispose());
+        this.decorationTypes.clear();
 
-        this.decorationType = vscode.window.createTextEditorDecorationType(
-            createBloodDripStyle(1)
-        );
+        // Critical Error - Heavy blood drip with left border
+        this.decorationTypes.set('error', vscode.window.createTextEditorDecorationType({
+            isWholeLine: true,
+            backgroundColor: 'rgba(139, 0, 0, 0.15)',
+            borderColor: 'rgba(139, 0, 0, 0.7)',
+            borderWidth: '0 0 0 4px',
+            borderStyle: 'solid',
+            after: {
+                contentText: ' 🩸',
+                margin: '0 0 0 1em',
+                color: '#8B0000'
+            },
+            overviewRulerColor: '#8B0000',
+            overviewRulerLane: vscode.OverviewRulerLane.Right
+        }));
+
+        // Warning - Light blood drip
+        this.decorationTypes.set('warning', vscode.window.createTextEditorDecorationType({
+            isWholeLine: true,
+            backgroundColor: 'rgba(139, 0, 0, 0.08)',
+            borderColor: 'rgba(139, 0, 0, 0.4)',
+            borderWidth: '0 0 0 2px',
+            borderStyle: 'solid',
+            after: {
+                contentText: ' 💧',
+                margin: '0 0 0 1em',
+                color: '#CD5C5C'
+            }
+        }));
+
+        // Info - Ghost mark
+        this.decorationTypes.set('info', vscode.window.createTextEditorDecorationType({
+            isWholeLine: true,
+            backgroundColor: 'rgba(211, 211, 211, 0.08)',
+            after: {
+                contentText: ' 👻',
+                margin: '0 0 0 1em',
+                color: '#D3D3D3'
+            }
+        }));
     }
+
 
     /**
      * Handle diagnostic changes
@@ -95,73 +121,90 @@ class BloodDripController {
         const affectsCurrentDocument = uris.some(uri => uri.toString() === documentUri);
 
         if (affectsCurrentDocument) {
-            this.updateErrorLines(editor);
-            this.updateDecorations(editor);
+            const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
+            this.applyDecorationsToEditor(editor, diagnostics);
         }
     }
 
     /**
-     * Update the list of error lines
+     * Apply decorations to editor based on diagnostics
      * @param {vscode.TextEditor} editor
+     * @param {vscode.Diagnostic[]} diagnostics
      */
-    updateErrorLines(editor) {
-        const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
-        const newErrorLines = new Map();
-
-        diagnostics
-            .filter(d => d.severity === vscode.DiagnosticSeverity.Error)
-            .forEach(diagnostic => {
-                const line = diagnostic.range.start.line;
-                const key = `${line}`;
-
-                // Preserve existing animation frame if line already had error
-                const existing = this.errorLines.get(key);
-                newErrorLines.set(key, {
-                    line: line,
-                    frame: existing ? existing.frame : 0
-                });
-            });
-
-        this.errorLines = newErrorLines;
-    }
-
-    /**
-     * Update decorations for the given editor
-     * @param {vscode.TextEditor} editor
-     */
-    updateDecorations(editor) {
-        if (!this.isEnabled || !this.decorationType) {
-            return;
-        }
+    applyDecorationsToEditor(editor, diagnostics) {
+        if (!this.isEnabled) return;
 
         try {
-            const ranges = [];
+            const errorRanges = [];
+            const warningRanges = [];
+            const infoRanges = [];
 
-            this.errorLines.forEach((errorInfo) => {
-                const range = new vscode.Range(errorInfo.line, 0, errorInfo.line, 0);
-                ranges.push(range);
+            diagnostics.forEach(diagnostic => {
+                const line = editor.document.lineAt(diagnostic.range.start.line);
+                const range = new vscode.Range(
+                    diagnostic.range.start.line,
+                    0,
+                    diagnostic.range.start.line,
+                    line.text.length
+                );
+
+                switch (diagnostic.severity) {
+                    case vscode.DiagnosticSeverity.Error:
+                        errorRanges.push(range);
+                        this.animateBloodDrip(editor, range);
+                        break;
+                    case vscode.DiagnosticSeverity.Warning:
+                        warningRanges.push(range);
+                        break;
+                    case vscode.DiagnosticSeverity.Information:
+                    case vscode.DiagnosticSeverity.Hint:
+                        infoRanges.push(range);
+                        break;
+                }
             });
 
-            editor.setDecorations(this.decorationType, ranges);
+            const errorType = this.decorationTypes.get('error');
+            const warningType = this.decorationTypes.get('warning');
+            const infoType = this.decorationTypes.get('info');
+
+            if (errorType) editor.setDecorations(errorType, errorRanges);
+            if (warningType) editor.setDecorations(warningType, warningRanges);
+            if (infoType) editor.setDecorations(infoType, infoRanges);
         } catch (error) {
             ErrorHandler.handleError(error, 'Blood drip decoration update');
         }
     }
 
     /**
-     * Animate one frame of the blood drip effect
+     * Animate blood drip effect on a line
+     * @param {vscode.TextEditor} editor
+     * @param {vscode.Range} range
      */
-    animateFrame() {
-        // Increment frame counters for animation
-        this.errorLines.forEach((errorInfo, key) => {
-            errorInfo.frame = (errorInfo.frame + 1) % 30;
-        });
+    animateBloodDrip(editor, range) {
+        let frameIndex = 0;
 
-        // Refresh decorations if there are error lines
-        const editor = vscode.window.activeTextEditor;
-        if (editor && this.errorLines.size > 0) {
-            this.updateDecorations(editor);
-        }
+        const animate = () => {
+            if (frameIndex >= ANIMATION_FRAMES.length || this.isPaused) return;
+
+            const decorationType = vscode.window.createTextEditorDecorationType({
+                after: {
+                    contentText: ` ${ANIMATION_FRAMES[frameIndex]}`,
+                    margin: '0 0 0 2em',
+                    color: '#8B0000'
+                }
+            });
+
+            editor.setDecorations(decorationType, [range]);
+
+            setTimeout(() => {
+                decorationType.dispose();
+                frameIndex++;
+                animate();
+            }, ANIMATION_SPEED);
+        };
+
+        // Start animation after brief delay
+        setTimeout(() => animate(), 300);
     }
 
     /**
@@ -169,9 +212,6 @@ class BloodDripController {
      */
     enable() {
         this.isEnabled = true;
-        if (this.animationLoop) {
-            this.animationLoop.start();
-        }
         if (vscode.window.activeTextEditor) {
             this.handleDiagnosticsChange([vscode.window.activeTextEditor.document.uri]);
         }
@@ -204,28 +244,20 @@ class BloodDripController {
      */
     clearDecorations() {
         const editor = vscode.window.activeTextEditor;
-        if (editor && this.decorationType) {
-            editor.setDecorations(this.decorationType, []);
+        if (editor) {
+            this.decorationTypes.forEach(type => {
+                editor.setDecorations(type, []);
+            });
         }
-        this.errorLines.clear();
     }
 
     /**
      * Dispose of all resources
      */
     dispose() {
-        if (this.animationLoop) {
-            this.animationLoop.stop();
-            this.animationLoop = null;
-        }
-
         this.clearDecorations();
-
-        if (this.decorationType) {
-            this.decorationType.dispose();
-            this.decorationType = null;
-        }
-
+        this.decorationTypes.forEach(type => type.dispose());
+        this.decorationTypes.clear();
         this.disposables.forEach(d => d.dispose());
         this.disposables = [];
 
